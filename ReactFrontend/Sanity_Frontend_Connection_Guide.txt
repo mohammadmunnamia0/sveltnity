@@ -1,0 +1,64 @@
+Sanity & React Frontend Connection Guide
+========================================
+
+This guide explains how to connect a Sanity backend to a React frontend, as implemented in this project.
+
+1. Install the Sanity Client
+----------------------------
+In your React frontend directory, install the official Sanity client:
+
+    npm install @sanity/client
+
+2. Configure the Sanity Client
+------------------------------
+Create a utility file (e.g., `src/Utlity/sanityClient.js`) and configure it with your Sanity project details:
+
+    import { createClient } from '@sanity/client';
+
+    const client = createClient({
+      projectId: 'hy0aw49y', // from sanity.config.ts
+      dataset: 'production',
+      useCdn: true, // set to false if you want fresh data
+      apiVersion: '2023-01-01', // use a UTC date string
+    });
+
+    export default client;
+
+- `projectId` and `dataset` are found in your Sanity backend's `sanity.config.ts`.
+
+3. Fetch Data from Sanity in React
+----------------------------------
+Use the configured client to fetch data in your React components. Example for fetching blog posts:
+
+    import React, { useEffect, useState } from 'react';
+    import sanityClient from '../../Utlity/sanityClient';
+
+    const Blog = () => {
+      const [posts, setPosts] = useState([]);
+      useEffect(() => {
+        sanityClient
+          .fetch(`*[_type == "post"]{_id, title, slug}`)
+          .then(setPosts)
+          .catch(console.error);
+      }, []);
+      return (
+        <div>
+          <h1>Blog Posts</h1>
+          {posts.map(post => <div key={post._id}>{post.title}</div>)}
+        </div>
+      );
+    };
+
+    export default Blog;
+
+4. (Optional) Fetch Images and Other Fields
+-------------------------------------------
+You can expand your GROQ query to fetch more fields, such as images or body content. For images, you may want to use the `@sanity/image-url` package.
+
+5. Run and Test
+---------------
+- Ensure your Sanity backend is running and has published content.
+- Start your React frontend and navigate to the relevant page to see data fetched from Sanity.
+
+---
+This process enables your React app to dynamically fetch and display content managed in Sanity. 
